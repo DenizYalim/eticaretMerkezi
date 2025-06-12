@@ -6,28 +6,27 @@ import time
 from app import app, db, Product, Comment
 
 options = Options()
-# options.add_argument("--headless")
+options.add_argument("--headless")
 service = Service()
 
 driver = webdriver.Chrome(service=service, options=options)
 
-url = "https://www.n11.com/urun/apple-ipad-2021-9-nesil-wi-fi-mk2n3tua-256-gb-102-tablet-gri-2154031?magaza=mertel"
+url = "https://www.hepsiburada.com/vivaq/kadin-siyah-4-cepli-kapakli-kolon-askili-fermuar-ve-cit-cit-kapama-el-kol-ve-omuz-cantasi-p-895538051/yorumlar?boutiqueId=61&merchantId=512967&sav=true"
 driver.get(url)
-produc_id = 3
 
 time.sleep(2) # dynamic js loading wait
 
-comments = driver.find_elements(By.XPATH, "//li[contains(@class, 'comment')]")
-print(len(comments))
+
+comments = driver.find_elements(By.CLASS_NAME, "comment")
 
 scraped_comments = []
 
 for comment in comments:
     try:
-        username = comment.find_element(By.CLASS_NAME, 'userName').text
-        commentPlatform = "n11"
+        username = comment.find_element(By.CLASS_NAME, 'comment-info-item').text
+        commentPlatform = "trendyol"
         rating = "yeah not doing this"
-        userComment = comment.find_element(By.TAG_NAME, "p").text
+        userComment = comment.find_element(By.CLASS_NAME, "comment-text").text
 
         scraped_comments.append(Comment(product_id=3, user= username, text= userComment, rating=5, platform= commentPlatform))
     except:
@@ -37,7 +36,7 @@ driver.quit()
 
 
 with app.app_context():
-    db_comments = Comment.query.filter_by(product_id=produc_id).all()
+    db_comments = Comment.query.filter_by(product_id=3).all()
     item_count_added = 0
 
     for comment in scraped_comments:
@@ -49,6 +48,6 @@ with app.app_context():
         
         if not flag:
             db.session.add(comment)
-            item_count_added += 1
+            item_count_added = 1
     db.session.commit()
     print(f"scraped data sucessfully, added {item_count_added} items")
